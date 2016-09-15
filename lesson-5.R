@@ -1,43 +1,45 @@
 ## Libraries and data
 
 library(dplyr)
-library(...)
-surveys <- read.csv(..., na.strings = "") %>%
-  filter(!is.na(species_id), !is.na(sex), !is.na(weight))
+library(ggplot2)
+surveys <- read.csv('data/surveys.csv', na.strings = "") %>%
+  filter(!is.na(species_id), !is.na(sex), !is.na(weight)) ##removing na values
 
 ## Constructing layered graphics in ggplot
 
-ggplot(...,
-       ...) +
-  ...
+ggplot(data=surveys,
+       aes(x=species_id, y=weight)) +
+  geom_point()
 
 ggplot(data = surveys,
        aes(x = species_id, y = weight)) +
-  ...
-  geom_point(...,
-             ...,
-             ...)
+  geom_boxplot() +
+  geom_point(stat="summary",
+             fun.y="mean",
+             color="red")
 
 ## Exercise 1
 
-...
-
+df_DM=filter(surveys, species_id=="DM")
+ggplot(data=df_DM, aes(x=year, y=weight, color=sex)) + 
+  geom_point(stat="summary", fun.y="mean", show.legend=TRUE)
+??aes
+??geom_point
+head(df_DM)
 ## Adding a regression line
 
 levels(surveys$sex) <- c("Female", "Male")
-surveys_dm <- filter(surveys, ...)
-ggplot(...,
+surveys_dm <- filter(surveys, species_id=="DM")
+ggplot(surveys_dm,
        aes(x = year, y = weight)) +
-  geom_point(...,
+  geom_point(aes(shape=sex),
              size = 3,
              stat = "summary",
-             fun.y = "mean") +
-  ...
+             fun.y = "mean")+
+  geom_smooth(aes(group=sex, color=sex),method="lm")
 
 ggplot(data = surveys_dm,
-       aes(...,
-           ...,
-           ...)) +
+       aes(x=year, y=weight, color=sex) +
   geom_point(aes(shape = sex),
              size = 3,
              stat = "summary",
@@ -46,32 +48,39 @@ ggplot(data = surveys_dm,
 
 # Storing and re-plotting
 
-year_wgt <- ggplot(data = surveys_dm,
-                   aes(x = year,
-                       y = weight,
-                       color = sex)) +
-  geom_point(aes(shape = sex),
-             size = 3,
-             stat = "summary",
-             fun.y = "mean") +
-  geom_smooth(method = "lm")
+plot (year_wgt)
 
 year_wgt +
   ...
                      
 year_wgt <- year_wgt +
-  scale_color_manual(...)
+  scale_color_manual(values=c("darkblue", "orange"))
 year_wgt
 
 ## Exercise 2
-
-...
-
+surveys_dm[1:5,1:9]
+surveys_dm2=filter(surveys_dm, !is.na(weight))
+ggplot(surveys_dm2,  aes(weight, fill=sex)) +
+      geom_histogram()
+summary(surveys_dm2$weight)
+head(surveys_dm2)
+??geom_histogram
 ## Axes, labels and themes
-
 histo <- ggplot(data = surveys_dm,
                 aes(x = weight, fill = sex)) +
-  geom_...
+  geom_histogram(binwidth = 3, color = "white")
+histo
+histo <- histo + 
+  labs(title = "Dipodomys merriami weight distribution",
+       x = "Weight (g)",
+       y = "Count") +
+  scale_x_continuous(limits = c(20, 60),
+                     breaks = c(20, 30, 40, 50, 60))
+histo
+
+histo <- ggplot(data = surveys_dm,
+                aes(x = "weight (g)", fill = sex)) +
+  geom_histogram()
 histo
 
 histo <- histo +
@@ -85,7 +94,7 @@ histo
 histo <- histo +
   theme_bw() +
   theme(legend.position = c(0.2, 0.5),
-        plot.title = ...,
+        plot.title = element_text(face="bold"),
         ... = element_text(...),
         ... = element_text(size = 13, vjust = 0))
 histo
@@ -99,7 +108,7 @@ levels(surveys_dm$month) <- c("January", "February", "March", "April", "May", "J
 ggplot(data = surveys_dm,
        aes(x = weight)) +
   geom_histogram() +
-  ...
+  facet_wrap(~month)+
   labs(title = "DM weight distribution by month",
        x = "Count",
        y = "Weight (g)")
